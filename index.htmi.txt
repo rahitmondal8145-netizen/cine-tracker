@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cine গল্প Studio - Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b',
+                        accent: '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-darkbg text-slate-100 font-sans min-h-screen pb-12">
+
+    <!-- Top Navigation -->
+    <header class="bg-cardbg border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-accent text-white p-2.5 rounded-xl shadow-lg">
+                    <i class="fa-solid fa-clapperboard text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Cine গল্প Studio</h1>
+                    <p class="text-xs text-slate-400">Personal Business & Expense Dashboard</p>
+                </div>
+            </div>
+            <!-- Nav Tabs -->
+            <div class="flex flex-wrap gap-2 bg-slate-900/60 p-1.5 rounded-xl border border-slate-800">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-lg text-sm font-medium transition bg-accent text-white shadow"><i class="fa-solid fa-chart-pie mr-2"></i>ড্যাশবোর্ড</button>
+                <button onclick="switchTab('wedding')" id="nav-wedding" class="px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white"><i class="fa-solid fa-ring mr-2"></i>ওয়েডিং প্রজেক্ট</button>
+                <button onclick="switchTab('reels')" id="nav-reels" class="px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white"><i class="fa-solid fa-video mr-2"></i>রিলস ও শর্ট কাজ</button>
+                <button onclick="switchTab('photography')" id="nav-photography" class="px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white"><i class="fa-solid fa-camera mr-2"></i>ক্যামেরা/ফটো শুটিং</button>
+                <button onclick="switchTab('expenses')" id="nav-expenses" class="px-4 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white"><i class="fa-solid fa-wallet mr-2"></i>ডেইলি খরচ</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-8">
+
+        <!-- DASHBOARD TAB -->
+        <section id="tab-dashboard" class="space-y-6">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow">
+                    <p class="text-slate-400 text-sm">মোট টার্নওভার (মাসিক)</p>
+                    <h3 id="stat-turnover" class="text-2xl font-bold text-emerald-400 mt-1">₹0</h3>
+                </div>
+                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow">
+                    <p class="text-slate-400 text-sm">স্টাফ পেমেন্ট (মোট)</p>
+                    <h3 id="stat-staff" class="text-2xl font-bold text-rose-400 mt-1">₹0</h3>
+                </div>
+                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow">
+                    <p class="text-slate-400 text-sm">অন্যান্য খরচ/ইনভেস্ট</p>
+                    <h3 id="stat-expense" class="text-2xl font-bold text-amber-400 mt-1">₹0</h3>
+                </div>
+                <div class="bg-cardbg p-5 rounded-2xl border border-slate-800 shadow">
+                    <p class="text-slate-400 text-sm">নিট প্রফিট (হাতে থাকা)</p>
+                    <h3 id="stat-profit" class="text-2xl font-bold text-blue-400 mt-1">₹0</h3>
+                </div>
+            </div>
+
+            <!-- Graph Section -->
+            <div class="bg-cardbg p-6 rounded-2xl border border-slate-800 shadow">
+                <h3 class="text-lg font-semibold mb-4"><i class="fa-solid fa-chart-line mr-2 text-accent"></i>মাসিক ইনকাম ও খরচের গ্রাফ</h3>
+                <div class="h-72">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- WEDDING PROJECTS TAB -->
+        <section id="tab-wedding" class="hidden space-y-6">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-ring mr-2 text-accent"></i>ফুল ওয়েডিং প্রজেক্ট ম্যানেজমেন্ট</h2>
+                <button onclick="openModal('weddingModal')" class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow"><i class="fa-solid fa-plus mr-2"></i>নতুন ওয়েডিং অ্যাড করুন</button>
+            </div>
+            
+            <div class="bg-cardbg rounded-2xl border border-slate-800 overflow-x-auto shadow">
+                <table class="w-full text-left border-collapse text-sm">
+                    <tr class="border-b border-slate-800 text-slate-400 bg-slate-900/50">
+                        <th class="p-4">কাজের তারিখ</th>
+                        <th class="p-4">ক্লায়েন্ট নাম</th>
+                        <th class="p-4">ডেলিভারables (টিজার/রিলস)</th>
+                        <th class="p-4">টোটাল অ্যামাউন্ট</th>
+                        <th class="p-4">অ্যাডভান্স</th>
+                        <th class="p-4">স্টাফ পেমেন্ট</th>
+                        <th class="p-4">স্ট্যাটাস</th>
+                        <th class="p-4 text-right">অ্যাকশন</th>
+                    </tr>
+                    <tbody id="weddingTableBody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- REELS & SHORT WORK TAB -->
+        <section id="tab-reels" class="hidden space-y-6">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-video mr-2 text-accent"></i>ডেইলি রিলস ও শর্ট প্রজেক্ট</h2>
+                <button onclick="openModal('reelModal')" class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow"><i class="fa-solid fa-plus mr-2"></i>রিলস কাজ অ্যাড করুন</button>
+            </div>
+
+            <div class="bg-cardbg rounded-2xl border border-slate-800 overflow-x-auto shadow">
+                <table class="w-full text-left border-collapse text-sm">
+                    <tr class="border-b border-slate-800 text-slate-400 bg-slate-900/50">
+                        <th class="p-4">তারিখ</th>
+                        <th class="p-4">ক্লায়েন্ট/প্রজেক্ট</th>
+                        <th class="p-4">কয়টি রিলস/কাজ</th>
+                        <th class="p-4">টোটাল টাকা</th>
+                        <th class="p-4">পেমেন্ট স্ট্যাটাস</th>
+                        <th class="p-4 text-right">অ্যাকশন</th>
+                    </tr>
+                    <tbody id="reelTableBody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PHOTOGRAPHY / SHOOTING TAB -->
+        <section id="tab-photography" class="hidden space-y-6">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-camera mr-2 text-accent"></i>ক্যামেরা ও ফটো শুটিং ফ্রিল্যান্সিং</h2>
+                <button onclick="openModal('photoModal')" class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow"><i class="fa-solid fa-plus mr-2"></i>শুটিং কাজ অ্যাড করুন</button>
+            </div>
+
+            <div class="bg-cardbg rounded-2xl border border-slate-800 overflow-x-auto shadow">
+                <table class="w-full text-left border-collapse text-sm">
+                    <tr class="border-b border-slate-800 text-slate-400 bg-slate-900/50">
+                        <th class="p-4">শুটিং ডেট</th>
+                        <th class="p-4">স্থান / লোকেশন</th>
+                        <th class="p-4">ক্লায়েন্ট</th>
+                        <th class="p-4">টোটাল পেমেন্ট</th>
+                        <th class="p-4">অ্যাডভান্স</th>
+                        <th class="p-4 text-right">অ্যাকশন</th>
+                    </tr>
+                    <tbody id="photoTableBody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- DAILY EXPENSES TAB -->
+        <section id="tab-expenses" class="hidden space-y-6">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h2 class="text-xl font-bold"><i class="fa-solid fa-wallet mr-2 text-accent"></i>ডেইলি খরচ ও ইনভেস্টমেন্ট ট্র্যাকার</h2>
+                <button onclick="openModal('expenseModal')" class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow"><i class="fa-solid fa-plus mr-2"></i>নতুন খরচ যোগ করুন</button>
+            </div>
+
+            <div class="bg-cardbg rounded-2xl border border-slate-800 overflow-x-auto shadow">
+                <table class="w-full text-left border-collapse text-sm">
+                    <tr class="border-b border-slate-800 text-slate-400 bg-slate-900/50">
+                        <th class="p-4">তারিখ</th>
+                        <th class="p-4">বিবরণ / কি বাবদ খরচ</th>
+                        <th class="p-4">পরিমাণ (₹)</th>
+                        <th class="p-4 text-right">অ্যাকশন</th>
+                    </tr>
+                    <tbody id="expenseTableBody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALS FOR ADDING DATA -->
+
+    <!-- Wedding Modal -->
+    <div id="weddingModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-cardbg border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-lg font-bold">নতুন ওয়েডিং প্রজেক্ট যোগ করুন</h3>
+            <div class="space-y-3">
+                <input type="date" id="w_date" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="w_client" placeholder="ক্লায়েন্টের নাম" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="w_deliverables" placeholder="যেমন: ১ টিজার, ১ হাইলাইট, ৩ রিলস" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="w_total" placeholder="টোটাল অ্যামাউন্ট (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                    <input type="number" id="w_advance" placeholder="অ্যাডভান্স (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="w_staff" placeholder="স্টাফ পেমেন্ট (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                    <select id="w_status" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                        <option value="রানিং">রানিং প্রজেক্ট</option>
+                        <option value="কমপ্লিট">কমপ্লিট ও পেইড</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('weddingModal')" class="px-4 py-2 bg-slate-800 rounded-xl text-sm">বাতিল</button>
+                <button onclick="saveWedding()" class="px-4 py-2 bg-accent text-white rounded-xl text-sm">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reel Modal -->
+    <div id="reelModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-cardbg border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-lg font-bold">রিলস প্রজেক্ট যোগ করুন</h3>
+            <div class="space-y-3">
+                <input type="date" id="r_date" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="r_client" placeholder="ক্লায়েন্ট নাম" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="r_count" placeholder="কয়টি রিলস বা কাজ?" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="number" id="r_total" placeholder="টোটাল অ্যামাউন্ট (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('reelModal')" class="px-4 py-2 bg-slate-800 rounded-xl text-sm">বাতিল</button>
+                <button onclick="saveReel()" class="px-4 py-2 bg-accent text-white rounded-xl text-sm">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photoModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-cardbg border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-lg font-bold">ক্যামেরা শুটিং যোগ করুন</h3>
+            <div class="space-y-3">
+                <input type="date" id="p_date" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="p_location" placeholder="শুটিং লোকেশন" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="p_client" placeholder="ক্লায়েন্ট বা ইভেন্ট নাম" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="p_total" placeholder="টোটাল পেমেন্ট (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                    <input type="number" id="p_advance" placeholder="অ্যাডভান্স (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('photoModal')" class="px-4 py-2 bg-slate-800 rounded-xl text-sm">বাতিল</button>
+                <button onclick="savePhoto()" class="px-4 py-2 bg-accent text-white rounded-xl text-sm">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="expenseModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-cardbg border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-lg font-bold">ডেইলি খরচ যোগ করুন</h3>
+            <div class="space-y-3">
+                <input type="date" id="e_date" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="text" id="e_desc" placeholder="কী বাবদ খরচ (যেমন: ফুয়েল, গিয়ার পার্চেস)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+                <input type="number" id="e_amount" placeholder="টাকার পরিমাণ (₹)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:outline-accent">
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('expenseModal')" class="px-4 py-2 bg-slate-800 rounded-xl text-sm">বাতিল</button>
+                <button onclick="saveExpense()" class="px-4 py-2 bg-accent text-white rounded-xl text-sm">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let db = {
+            weddings: JSON.parse(localStorage.getItem('cine_weddings')) || [],
+            reels: JSON.parse(localStorage.getItem('cine_reels')) || [],
+            photos: JSON.parse(localStorage.getItem('cine_photos')) || [],
+            expenses: JSON.parse(localStorage.getItem('cine_expenses')) || []
+        };
+
+        function saveData() {
+            localStorage.setItem('cine_weddings', JSON.stringify(db.weddings));
+            localStorage.setItem('cine_reels', JSON.stringify(db.reels));
+            localStorage.setItem('cine_photos', JSON.stringify(db.photos));
+            localStorage.setItem('cine_expenses', JSON.stringify(db.expenses));
+            renderAll();
+        }
+
+        function switchTab(tabId) {
+            ['dashboard', 'wedding', 'reels', 'photography', 'expenses'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('nav-' + t).classList.remove('bg-accent', 'text-white', 'shadow');
+                document.getElementById('nav-' + t).classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('nav-' + tabId).classList.add('bg-accent', 'text-white', 'shadow');
+            document.getElementById('nav-' + tabId).classList.remove('text-slate-400');
+        }
+
+        function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); document.getElementById(modalId).classList.add('flex'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); document.getElementById(modalId).classList.remove('flex'); }
+
+        function saveWedding() {
+            db.weddings.push({
+                id: Date.now(),
+                date: document.getElementById('w_date').value,
+                client: document.getElementById('w_client').value,
+                deliverables: document.getElementById('w_deliverables').value,
+                total: Number(document.getElementById('w_total').value),
+                advance: Number(document.getElementById('w_advance').value),
+                staff: Number(document.getElementById('w_staff').value),
+                status: document.getElementById('w_status').value
+            });
+            closeModal('weddingModal');
+            saveData();
+        }
+
+        function saveReel() {
+            db.reels.push({
+                id: Date.now(),
+                date: document.getElementById('r_date').value,
+                client: document.getElementById('r_client').value,
+                count: document.getElementById('r_count').value,
+                total: Number(document.getElementById('r_total').value)
+            });
+            closeModal('reelModal');
+            saveData();
+        }
+
+        function savePhoto() {
+            db.photos.push({
+                id: Date.now(),
+                date: document.getElementById('p_date').value,
+                location: document.getElementById('p_location').value,
+                client: document.getElementById('p_client').value,
+                total: Number(document.getElementById('p_total').value),
+                advance: Number(document.getElementById('p_advance').value)
+            });
+            closeModal('photoModal');
+            saveData();
+        }
+
+        function saveExpense() {
+            db.expenses.push({
+                id: Date.now(),
+                date: document.getElementById('e_date').value,
+                desc: document.getElementById('e_desc').value,
+                amount: Number(document.getElementById('e_amount').value)
+            });
+            closeModal('expenseModal');
+            saveData();
+        }
+
+        function deleteItem(type, id) {
+            db[type] = db[type].filter(item => item.id !== id);
+            saveData();
+        }
+
+        let myChart = null;
+        function renderAll() {
+            // Wedding table
+            let wHtml = '';
+            db.weddings.forEach(w => {
+                wHtml += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                    <td class="p-4">${w.date}</td>
+                    <td class="p-4 font-medium">${w.client}</td>
+                    <td class="p-4 text-slate-300">${w.deliverables}</td>
+                    <td class="p-4 font-semibold text-emerald-400">₹${w.total}</td>
+                    <td class="p-4 text-slate-300">₹${w.advance}</td>
+                    <td class="p-4 text-rose-400">₹${w.staff}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs ${w.status === 'কমপ্লিট' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${w.status}</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('weddings', ${w.id})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
+            });
+            document.getElementById('weddingTableBody').innerHTML = wHtml || `<tr><td colspan="8" class="p-4 text-center text-slate-500">কোনো ওয়েডিং প্রজেক্ট নেই</td></tr>`;
+
+            // Reels table
+            let rHtml = '';
+            db.reels.forEach(r => {
+                rHtml += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                    <td class="p-4">${r.date}</td>
+                    <td class="p-4 font-medium">${r.client}</td>
+                    <td class="p-4 text-slate-300">${r.count}</td>
+                    <td class="p-4 font-semibold text-emerald-400">₹${r.total}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400">পেইড</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('reels', ${r.id})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
+            });
+            document.getElementById('reelTableBody').innerHTML = rHtml || `<tr><td colspan="6" class="p-4 text-center text-slate-500">কোনো রিলস কাজ নেই</td></tr>`;
+
+            // Photo table
+            let pHtml = '';
+            db.photos.forEach(p => {
+                pHtml += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                    <td class="p-4">${p.date}</td>
+                    <td class="p-4 font-medium">${p.location}</td>
+                    <td class="p-4 text-slate-300">${p.client}</td>
+                    <td class="p-4 font-semibold text-emerald-400">₹${p.total}</td>
+                    <td class="p-4 text-slate-300">₹${p.advance}</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('photos', ${p.id})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
+            });
+            document.getElementById('photoTableBody').innerHTML = pHtml || `<tr><td colspan="6" class="p-4 text-center text-slate-500">কোনো শুটিং প্রজেক্ট নেই</td></tr>`;
+
+            // Expense table
+            let eHtml = '';
+            db.expenses.forEach(e => {
+                eHtml += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/40">
+                    <td class="p-4">${e.date}</td>
+                    <td class="p-4 font-medium">${e.desc}</td>
+                    <td class="p-4 font-semibold text-amber-400">₹${e.amount}</td>
+                    <td class="p-4 text-right"><button onclick="deleteItem('expenses', ${e.id})" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
+            });
+            document.getElementById('expenseTableBody').innerHTML = eHtml || `<tr><td colspan="4" class="p-4 text-center text-slate-500">কোনো খরচের হিসাব নেই</td></tr>`;
+
+            // Calculation Stats
+            let totalWeddingInc = db.weddings.reduce((acc, curr) => acc + curr.total, 0);
+            let totalReelInc = db.reels.reduce((acc, curr) => acc + curr.total, 0);
+            let totalPhotoInc = db.photos.reduce((acc, curr) => acc + curr.total, 0);
+            let grandTurnover = totalWeddingInc + totalReelInc + totalPhotoInc;
+
+            let totalStaff = db.weddings.reduce((acc, curr) => acc + curr.staff, 0);
+            let totalExpense = db.expenses.reduce((acc, curr) => acc + curr.amount, 0);
+            let netProfit = grandTurnover - (totalStaff + totalExpense);
+
+            document.getElementById('stat-turnover').innerText = '₹' + grandTurnover;
+            document.getElementById('stat-staff').innerText = '₹' + totalStaff;
+            document.getElementById('stat-expense').innerText = '₹' + totalExpense;
+            document.getElementById('stat-profit').innerText = '₹' + netProfit;
+
+            // Render Chart
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['ওয়েডিং ইনকাম', 'রিলস ইনকাম', 'শুটিং ইনকাম', 'স্টাফ খরচ', 'অন্যান্য খরচ'],
+                    datasets: [{
+                        label: 'টাকার পরিমাণ (₹)',
+                        data: [totalWeddingInc, totalReelInc, totalPhotoInc, totalStaff, totalExpense],
+                        backgroundColor: ['#10b981', '#3b82f6', '#06b6d4', '#f43f5e', '#f59e0b'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>
